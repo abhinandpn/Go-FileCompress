@@ -2,33 +2,38 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	basecall "github.com/abhinandpn/Go-FileCompress/baseCall"
 	"github.com/abhinandpn/Go-FileCompress/resize"
 )
 
 func main() {
-
-	// Set the base output directory
-	outputBaseDir := "resize"
-
+	// Get user input for the image path
 	inputPath, err := basecall.GetImage()
 	if err != nil {
-		fmt.Println("Error:", err)
-		return // Exit the program
+		log.Fatal("Error reading input:", err)
 	}
 
-	err = basecall.Validation(inputPath)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return // Exit the program
+	// Validate if the file exists
+	if err := basecall.Validation(inputPath); err != nil {
+		log.Fatal("File validation failed:", err)
 	}
 
-	// Call the function to resize and save images
-	err = resize.ResizeAndSave(inputPath, outputBaseDir)
-	if err != nil {
-		fmt.Println("Error:", err)
-	} else {
-		fmt.Println("Images successfully saved in:", outputBaseDir)
+	// Ensure output directory exists
+	outputBaseDir := "output/directory"
+	if err := os.MkdirAll(outputBaseDir, os.ModePerm); err != nil {
+		log.Fatal("Failed to create output directory:", err)
 	}
+
+	// Set the target file size (in KB)
+	targetSizeKB := 100
+
+	// Resize and save the image
+	if err := resize.ResizeAndSave(inputPath, outputBaseDir, targetSizeKB); err != nil {
+		log.Fatal("Error resizing image:", err)
+	}
+
+	fmt.Println("Image compression completed successfully!")
 }
